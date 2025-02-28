@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-states-440744240874"
+    bucket         = "nome-do-bucket-criado"
     region         = "us-east-1"
     key            = "terraform/state.tfstate"
-    dynamodb_table = "terraform-states-lock"
+    dynamodb_table = "nome-da-tabela-criada"
     encrypt        = true
   }
 }

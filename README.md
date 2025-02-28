@@ -157,6 +157,22 @@ module "ec2_instance" {
 ```bash
 terraform apply
 ```
+## ⚠️ Atenção
+Os comandos do Kind devem ser utilizado com o `sudo`:
+```bash
+sudo kind get clusters
+```
+O script leva de 4 a 8 minutos para instalar todas as ferramentas e criar o cluster no Kind, então caso acesse o sevidor e receba erros como o mostrado abaixo, é porque o cluster ainda não foi criado totalmente:
+
+```hcl
+$ kubectl get nodes
+E0228 02:54:38.722630   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.724144   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.725508   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.727079   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.728503   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+```
 
 ## ⚙️ Configuração Extras
 
@@ -164,10 +180,18 @@ terraform apply
 
 Exsite um arquivo chamado template_file.tf na pasta `infrastructure/ec2` que possui um script bash que faz a instalção das ferramente Docker, Kubectl, Kind, Helm e faz o deploy de uma aplicação simples do Nginx do respositório `https://owiltoncezar.github.io/generic-app/`. Ele está configurado com comandos para o Ubuntu. Caso utilize outro S.O., será necessário ajustá-lo.
 
-Para testar esse deploy é necessário acessar a instância via ssh e rodar o comando:
+Para testar esse deploy é necessário acessar a instância via ssh e rodar os comandos:
+
+Para verificar se o pod está rodando:
 ```bash
-kubectl port-forward --address -n nginx 0.0.0.0 svc/nginx-service 8080:80
+kubectl get pods -n nginx
 ```
+
+Redirecionar a porta para acesso externo:
+```bash
+kubectl port-forward -n nginx --address 0.0.0.0 svc/nginx-service 8080:80
+```
+
 Após a execução do comando basta colocar no navegador o Ip publico da instância direcionando para a porta 8080:
 ```bash
 http://<IP_publico_da_instância>:8080
@@ -180,10 +204,18 @@ helm install nginx generic-app/generic-app --namespace nginx --create-namespace
 ```
 Seguir esses passos - [Instalar a partir de uma pasta local](https://github.com/owiltoncezar/generic-app?tab=readme-ov-file#instalar-a-partir-de-uma-pasta-local)
 
-Rodar o comando:
+Rodar os comandos:
+
+Para verificar se o pod está rodando:
 ```bash
-kubectl port-forward --address -n "nome-do-seu-namespace" 0.0.0.0 svc/"nome-do-seu-service" 8080:80
+kubectl get pods -n "nome-do-seu-namespace"
 ```
+
+Redirecionar a porta para acesso externo:
+```bash
+kubectl port-forward -n "nome-do-seu-namespace" --address 0.0.0.0 svc/"nome-do-seu-service" 8080:80
+```
+
 Após a execução do comando basta colocar no navegador o Ip publico da instância direcionando para a porta 8080:
 ```bash
 http://<IP_publico_da_instância>:8080
@@ -196,9 +228,9 @@ Caso você não tenha um par de chave ssh, execute o seguinte comando no termina
 ```bash
 ssh-keygen -t rsa -b 4096 -C "seu-email@exemplo.com" -f ~/.ssh/asatech_key
 ```
--t rsa: Define o tipo de chave como RSA.
--b 4096: Define o tamanho da chave como 4096 bits (recomendado para maior segurança).
--C "seu-email@exemplo.com": Adiciona um comentário à chave (geralmente um e-mail ou identificador).
+-t rsa: Define o tipo de chave como RSA.  
+-b 4096: Define o tamanho da chave como 4096 bits (recomendado para maior segurança).  
+-C "seu-email@exemplo.com": Adiciona um comentário à chave (geralmente um e-mail ou identificador).  
 -f ~/.ssh/asatech_key: Define o local e o nome do arquivo da chave (neste caso, asatech_key).
 
 **Proteger a Chave Privada**.
@@ -207,8 +239,8 @@ Durante a criação, você será solicitado a definir uma senha (passphrase) par
 
 **Após a execução do comando, duas chaves serão geradas:**
 
-Chave Pública: ~/.ssh/asatech_key.pub
-Chave Privada: ~/.ssh/asatech_key
+ - Chave Pública: ~/.ssh/asatech_key.pub
+ - Chave Privada: ~/.ssh/asatech_key
 
 Você pode visualizar o conteúdo da chave pública com o comando:
 
