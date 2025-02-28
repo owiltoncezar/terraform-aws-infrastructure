@@ -2,7 +2,7 @@
 
 Este projeto utiliza o **Terraform** para provisionar e gerenciar recursos na **AWS**. Ele inclui módulos para configurar um backend local ou remoto usando **S3** e **DynamoDB**, criar uma chave **SSH** e provisionar uma instância **EC2**. 
 
-A instância **EC2** será provisionada com **Docker**, **Kubectl**, **Kind** e **Helm** pré-instalados. Além disso, um cluster **Kubernetes** será criado automaticamente usando o **Kind**, com o nome **asatech**. Esse cluster estará pronto para o deploy de aplicações.
+A instância EC2 será provisionada com **Docker**, **Kubectl**, **Kind** e **Helm** pré-instalados. Além disso, um cluster Kubernetes será criado automaticamente usando o Kind, com o nome 'asatech'. Nesse cluster, será realizado o deploy de um Nginx básico, mas ele poderá receber outros deploys de aplicações conforme necessário."
 
 ---
 
@@ -121,7 +121,8 @@ Execute o comando abaixo para migrar o estado do backend local para o backend re
 terraform init -migrate-state
 ```
 Agora o Terraform usa o backend no S3 com lock no DynamoDB.  
-**Nota:** Caso já tenha um bucket S3 e uma tabela DynamoDB, basta atualizar o arquivo backend_remote_config.tf e executar um comando ```terraform init```.
+
+ℹ️ **Nota:** Caso já tenha um bucket S3 e uma tabela DynamoDB criados, basta atualizar o arquivo backend_remote_config.tf e executar um comando ```terraform init```.
 
 
 ### Configuração do Infrastructure
@@ -153,16 +154,16 @@ module "ec2_instance" {
   delete_on_termination   = "true ou false, para que o disco seja deletado junto com a instância"
 }
 ```
-2️⃣ Execute os comandos abaixo para criar Key-Par e a instância EC2:
+2️⃣ Execute os comandos abaixo para criar a Key-Par e a instância EC2:
 ```bash
 terraform apply
 ```
 ## ⚠️ Atenção
-Os comandos do Kind devem ser utilizado com o `sudo`:
+Os comandos do Kind devem ser utilizado com o `sudo`, como por exemplo:
 ```bash
 sudo kind get clusters
 ```
-O script leva de 4 a 8 minutos para instalar todas as ferramentas e criar o cluster no Kind, então caso acesse o sevidor e receba erros como o mostrado abaixo, é porque o cluster ainda não foi criado totalmente:
+⏳ O script leva de 4 a 8 minutos para instalar todas as ferramentas e criar o cluster no Kind, então caso acesse o sevidor e receba erros como os mostrados abaixo, é porque o cluster ainda não foi criado totalmente:
 
 ```hcl
 $ kubectl get nodes
@@ -173,8 +174,12 @@ E0228 02:54:38.727079   15574 memcache.go:265] "Unhandled Error" err="couldn't g
 E0228 02:54:38.728503   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
 The connection to the server localhost:8080 was refused - did you specify the right host or port?
 ```
+```hcl
+$ sudo kind get clusters
+No kind clusters found.
+```
 
-## ⚙️ Configuração Extras
+## 🔧 Configuração Extras
 
 ### Script
 
@@ -196,17 +201,17 @@ Após a execução do comando basta colocar no navegador o Ip publico da instân
 ```bash
 http://<IP_publico_da_instância>:8080
 ```
-**Nota:** Caso prefira instalar manualmente ou alterar algum valor do helm, basta comentar ou remover as linhas abaixo do script:
+ℹ️ **Nota:** Caso prefira instalar manualmente ou alterar algum valor do helm, basta comentar ou remover as linhas abaixo do script:
 ```bash
 helm repo add generic-app https://owiltoncezar.github.io/generic-app/
 helm repo update
 helm install nginx generic-app/generic-app --namespace nginx --create-namespace
 ```
-Seguir esses passos - [Instalar a partir de uma pasta local](https://github.com/owiltoncezar/generic-app?tab=readme-ov-file#instalar-a-partir-de-uma-pasta-local)
+Instale o Git (o ubuntu já vem com o git instalado).
 
-Rodar os comandos:
+Siga os passo desse procedimento - [Instalar Helm a partir de uma pasta local](https://github.com/owiltoncezar/generic-app?tab=readme-ov-file#instalar-a-partir-de-uma-pasta-local)
 
-Para verificar se o pod está rodando:
+Verificar se o pod está rodando:
 ```bash
 kubectl get pods -n "nome-do-seu-namespace"
 ```
@@ -216,9 +221,17 @@ Redirecionar a porta para acesso externo:
 kubectl port-forward -n "nome-do-seu-namespace" --address 0.0.0.0 svc/"nome-do-seu-service" 8080:80
 ```
 
-Após a execução do comando basta colocar no navegador o Ip publico da instância direcionando para a porta 8080:
+Após a execução do comando o endereço:
 ```bash
 http://<IP_publico_da_instância>:8080
+```
+
+Para desinstalar executar os comandos:
+```bash
+helm uninstall "nome-do-seu-app" --namespace "nome-do-namespace"
+```
+```bash
+kubectl delete namespace "nome-do-namespace"
 ```
 
 ### 🔑 Par de Chaves SSH
