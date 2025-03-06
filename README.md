@@ -87,15 +87,15 @@ Se você ainda não possui um bucket S3 e uma tabela DynamoDB para armazenar os 
 
 1️⃣ Acesse a pasta raiz e edite o arquivo terraform.tfvars conforme suas preferências.
 ```hcl
-profile             = "terraform"
-region              = "us-east-1"
-bucket_name         = "terraform-states"
-dynamodb_table_name = "terraform-states-lock"
-name                = "Asatech"
-instance_type       = "t2.micro"
-volume_type         = "gp3"
-volume_size         = 20
-public_key          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDK1TAW3/qzrmtKA3cDaFJXPT0wumlR4XbEAd6+kVw98AFNZT7WUGufm+Pnrv1WZPf7DDQpxcHAW21m1Z2GX3M4wUIvNbQdR4V32xUT3tEyp3iXm4Ocz5NUec+1cn1yl6eNS0qTIE2dhW6c/dopkqS7dc/5gJwd2yynCvP+TTRq9bORcD98NTOZv/nUjxZdoQmfXyD7xldpOywNjmU1ZcgzEGD2KLLiX42tVyIRpVdbCQe8ckV/lGAe7Ix4RVo0xqvFOgSg841a3DT9fco2wEAFh/a++glOzzlsTm8dOxGQ0nYOYODB97EdXrHFUDd4SD2gRtScUd5EFVBzWqlliMvT"
+profile             = "nome-do-profile-configurado-para-o-awscli"
+region              = "regiao-que-deseja-criar-o-recurso"
+bucket_name         = "nome-do-bucket-para-armazenar-os-states-do-terraform"
+dynamodb_table_name = "nome-da-tabela-para-armazenar-os-states-lock"
+name                = "nome-para-os-recursos(Instancia, Security Group, Key-par e etc.)"
+instance_type       = "tipo-da-instância"
+volume_type         = "tipo-do-disco-ebs"
+volume_size         = "tamanho-do-disco-ebs"
+public_key          = "valor da chave publica no formato válido do OpenSSH"
 ```
 
 2️⃣ Execute os comandos:
