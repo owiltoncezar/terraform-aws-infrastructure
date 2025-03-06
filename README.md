@@ -95,7 +95,7 @@ name                = "nome-para-os-recursos(Instancia, Security Group, Key-par 
 instance_type       = "tipo-da-instância"
 volume_type         = "tipo-do-disco-ebs"
 volume_size         = "tamanho-do-disco-ebs"
-public_key          = "valor da chave publica no formato válido do OpenSSH"
+public_key          = "valor da chave publica válida no formato do OpenSSH".
 ```
 
 2️⃣ Execute os comandos:
@@ -248,7 +248,7 @@ O valor que o comando retornar deve ser informado no Terraform (public_key).
 
 ## 🧹 Remoção da Infraestrutura
 
-1️⃣ Atualize o arquivo backend_config.tf comente as linhas abaixo:
+1️⃣ Atualize o arquivo backend_config.tf, comente as linhas abaixo:
 ```hcl
 terraform {
   backend "s3" {
@@ -269,7 +269,7 @@ Descomente ou adicione as linhas:
 # }
 ```
 
-2️⃣ Migre o estado para o backend local. 
+2️⃣ Migre o estado para o backend local.  
 Execute o comando abaixo para migrar o estado do backend remoto para o local remoto:
 ```bash
 terraform init -migrate-state
