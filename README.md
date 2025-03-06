@@ -23,10 +23,10 @@ Para utilizar este projeto, certifique-se de atender aos seguintes requisitos:
 
 | 🏷 Nome | 📂 Fonte |
 |---------|----------|
-| 🔹 [s3_backend](#module_s3_backend) | `./backend/s3` |
-| 🔹 [dynamodb_backend](#module_dynamodb_backend) | `./backend/dynamodb` |
-| 🔹 [key-par](#module_key-par) | `./infrastructure/key-par` |
-| 🔹 [ec2_instance](#module_ec2_instance) | `./infrastructure/ec2` |
+| 🔹 [s3_backend](./backend/s3)       | `./backend/s3`            |
+| 🔹 [dynamodb_backend](./backend/dynamodb) | `./backend/dynamodb`      |
+| 🔹 [key-par](./infrastructure/key-par)   | `./infrastructure/key-par` |
+| 🔹 [ec2_instance](./infrastructure/ec2)   | `./infrastructure/ec2`    |
 
 ### 📝 Descrição dos Módulos
 
