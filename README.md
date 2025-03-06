@@ -1,10 +1,23 @@
 # 🚀 Projeto Terraform para Infraestrutura na AWS
 
-Este projeto utiliza o **Terraform** para provisionar e gerenciar recursos na **AWS**. Ele inclui módulos para configurar um backend local ou remoto usando **S3** e **DynamoDB**, criar uma chave **SSH** e provisionar uma instância **EC2**. 
+Este projeto utiliza o **Terraform** para provisionar e gerenciar recursos na **AWS**. Ele inclui módulos para configurar um backend local ou remoto usando **S3** e **DynamoDB**, criar uma chave **SSH** e provisionar uma instância **EC2** com Ubuntu 24.04. 
 
 A instância EC2 será provisionada com **Docker**, **Kubectl**, **Kind** e **Helm** pré-instalados. Além disso, um cluster Kubernetes será criado automaticamente usando o Kind, com o nome 'asatech'. Nesse cluster, será realizado o deploy de um Nginx básico, mas ele poderá receber outros deploys de aplicações conforme necessário."
 
----
+## 📌 Requisitos  
+
+Para utilizar este projeto, certifique-se de atender aos seguintes requisitos:  
+
+- **Terraform** `v1.10.5` ou superior.  
+- **Provider AWS** `registry.terraform.io/hashicorp/aws v5.89.0` ou superior.  
+- **Provider Template** `registry.terraform.io/hashicorp/template v2.2.0` ou superior.  
+- **AWS CLI** configurado com credenciais válidas.  
+- **Conta AWS** com permissões suficientes para criar os recursos.  
+- **Chave SSH pública** para acessar a instância EC2:  
+  - **Tipo da Chave**: `ssh-rsa`.
+  - **Formato válido**:`OpenSSH`.
+  - **Chave Pública**: Deve estar no formato **Base64**, iniciando com `ssh-rsa` seguido da sequência de caracteres.  
+
 
 ## 📦 Módulos Utilizados
 
@@ -51,17 +64,15 @@ A instância EC2 será provisionada com **Docker**, **Kubectl**, **Kind** e **He
 🔹 Provisiona uma **instância EC2**.
 
 **Parâmetros:**
-- `name`: Nome da instância.
 - `profile`: Perfil AWS.
 - `region`: Região AWS.
 - `managed_by`: Ferramente que criouou gerencia o recurso.
+- `name`: Nome da instância.
 - `ami`: ID da AMI.
 - `instance_type`: Tipo da instância.
 - `key_name`: Nome da chave SSH.
-- `disable_api_termination`:Quando habilitado protege contra remoção acidental da instância.
 - `volume_type`: Tipo do disco Ebs.
 - `volume_size`: Tamanho do disco Ebs.
-- `delete_on_termination`: Define se o disco será deletado junto com a instância.
 
 ---
 ## 📌 Como Usar
@@ -71,50 +82,51 @@ git clone https://github.com/owiltoncezar/terraform-configs-poc.gitt
 cd "pasta-onde-clonou"
 ```
 
-### Configuração do Backend
+### Configuração da Infraestrutura
 Se você ainda não possui um bucket S3 e uma tabela DynamoDB para armazenar os estados do Terraform, siga os passos abaixo:
 
-1️⃣ Acesse a pasta backend edite o arquivo main.tf conforme suas preferências.
+1️⃣ Acesse a pasta raiz e edite o arquivo terraform.tfvars conforme suas preferências.
 ```hcl
-module "s3_backend" {
-  source      = "./s3"
-  profile     = "nome-do-profile-configurado-para-o-awscli"
-  region      = "regiao-que-deseja-criar-o-recurso"
-  bucket_name = "nome-do-bucket-para-armazenar-os-states-do-terraform"
-  state_key   = "terraform/state.tfstate"
-  managed_by  = "Terraform"
-  account_id  = "id da conta da aws"
-}
-
-module "dynamodb_backend" {
-  source              = "./dynamodb"
-  profile             = "nome-do-profile-configurado-para-o-awscli"
-  region              = "regiao-que-deseja-criar-o-recurso"
-  dynamodb_table_name = "nome-da-tabela-para-armazenar-os-states-lock"
-  managed_by          = "Terraform"
-}
+profile             = "terraform"
+region              = "us-east-1"
+bucket_name         = "terraform-states"
+dynamodb_table_name = "terraform-states-lock"
+name                = "Asatech"
+instance_type       = "t2.micro"
+volume_type         = "gp3"
+volume_size         = 20
+public_key          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDK1TAW3/qzrmtKA3cDaFJXPT0wumlR4XbEAd6+kVw98AFNZT7WUGufm+Pnrv1WZPf7DDQpxcHAW21m1Z2GX3M4wUIvNbQdR4V32xUT3tEyp3iXm4Ocz5NUec+1cn1yl6eNS0qTIE2dhW6c/dopkqS7dc/5gJwd2yynCvP+TTRq9bORcD98NTOZv/nUjxZdoQmfXyD7xldpOywNjmU1ZcgzEGD2KLLiX42tVyIRpVdbCQe8ckV/lGAe7Ix4RVo0xqvFOgSg841a3DT9fco2wEAFh/a++glOzzlsTm8dOxGQ0nYOYODB97EdXrHFUDd4SD2gRtScUd5EFVBzWqlliMvT"
 ```
 
-2️⃣ Execute os comandos abaixo para criar o bucket S3 e a tabela DynamoDB necessários:
+2️⃣ Execute os comandos:
 ```bash
 terraform init
 terraform apply
 ```
-Isso criará o bucket S3 e a tabela DynamoDB com os nomes especificados nos módulos s3_backend e dynamodb_backend.
+Isso criará todos os recursos necessários, porém salvando o terraform.states localmente.
 
-3️⃣ Atualize o backend para usar os recursos remotos
-Após a criação do bucket S3 e da tabela DynamoDB, acesse a pasta infrastructure e atualize o arquivo backend_remote_config.tf com os valores reais dos recursos criados:
+3️⃣ Atualize o backend para usar os recursos remotos:  
+Após a execução dos comandos acima atualize o arquivo backend_config.tf descomente as linhas abaixo e preencha com os valores reais dos recursos criados:
+```hcl
+# terraform {
+#   backend "s3" {
+#     bucket         = "nome-do-bucket-criado" # O bucket criado terá o Account ID adicionado no final.
+#     region         = "us-east-1"
+#     key            = "terraform/state.tfstate"
+#     dynamodb_table = "nome-da-tabela-criada"
+#     encrypt        = true
+#   }
+# }
+```
+Comente ou remova as linhas:
 ```hcl
 terraform {
-  backend "s3" {
-    bucket         = "nome-do-bucket-criado"
-    region         = "us-east-1"
-    key            = "terraform/state.tfstate"
-    dynamodb_table = "nome-da-tabela-criada"
-    encrypt        = true
+  backend "local" {
+    path = "terraform.tfstate"
   }
 }
 ```
+
 4️⃣ Migre o estado para o backend remoto. 
 Execute o comando abaixo para migrar o estado do backend local para o backend remoto:
 ```bash
@@ -122,62 +134,9 @@ terraform init -migrate-state
 ```
 Agora o Terraform usa o backend no S3 com lock no DynamoDB.  
 
-ℹ️ **Nota:** Caso já tenha um bucket S3 e uma tabela DynamoDB criados, basta atualizar o arquivo backend_remote_config.tf e executar um comando ```terraform init```.
-
-
-### Configuração do Infrastructure
-Para criar o Key-par e a instância EC2, siga os passos abaixo:
-
-1️⃣ Acesse a pasta infrastructure edite o arquivo main.tf conforme suas preferências.
-```hcl
-module "key-par" {
-  source     = "./key-par"
-  profile    = "nome-do-profile-configurado-para-o-awscli"
-  region     = "regiao-que-deseja-criar-o-recurso"
-  name       = "nome-da-chave-key-par"
-  public_key = "chave-publica"
-  managed_by = "Terraform"
-}
-
-module "ec2_instance" {
-  source                  = "./ec2"
-  name                    = "nome-da-instancia"
-  profile                 = "nome-do-profile-configurado-para-o-awscli"
-  region                  = "regiao-que-deseja-criar-o-recurso"
-  managed_by              = "Terraform"
-  ami                     = "id-da-imagem"
-  instance_type           = "tipo-da-instância"
-  key_name                = module.key-par.key
-  disable_api_termination = "true ou false, para proteger contra remoção acidental da instância"
-  volume_type             = "tipo-do-ebs"
-  volume_size             = "tamanho-do-ebs"
-  delete_on_termination   = "true ou false, para que o disco seja deletado junto com a instância"
-}
-```
-2️⃣ Execute os comandos abaixo para criar a Key-Par e a instância EC2:
-```bash
-terraform apply
-```
-## ⚠️ Atenção
-Os comandos do Kind devem ser utilizado com o `sudo`, como por exemplo:
-```bash
-sudo kind get clusters
-```
-⏳ O script leva de 4 a 8 minutos para instalar todas as ferramentas e criar o cluster no Kind, então caso acesse o sevidor e receba erros como os mostrados abaixo, é porque o cluster ainda não foi criado totalmente:
-
-```hcl
-$ kubectl get nodes
-E0228 02:54:38.722630   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
-E0228 02:54:38.724144   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
-E0228 02:54:38.725508   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
-E0228 02:54:38.727079   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
-E0228 02:54:38.728503   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
-The connection to the server localhost:8080 was refused - did you specify the right host or port?
-```
-```hcl
-$ sudo kind get clusters
-No kind clusters found.
-```
+ℹ️ **Notas:**  
+- Caso já tenha um bucket S3 e uma tabela DynamoDB criados, basta atualizar o arquivo backend_config.tf e executar um comando ```terraform init```.  
+- O Account ID será automaticamente adicionado ao final do nome do bucket escolhido para garantir unicidade, já que o nome de um bucket na AWS deve ser globalmente único em toda a plataforma.
 
 ## 🔧 Configuração Extras
 
@@ -185,7 +144,12 @@ No kind clusters found.
 
 Exsite um arquivo chamado template_file.tf na pasta `infrastructure/ec2` que possui um script bash que faz a instalção das ferramente Docker, Kubectl, Kind, Helm e faz o deploy de uma aplicação simples do Nginx do respositório `https://owiltoncezar.github.io/generic-app/`. Ele está configurado com comandos para o Ubuntu. Caso utilize outro S.O., será necessário ajustá-lo.
 
-Para testar esse deploy é necessário acessar a instância via ssh e rodar os comandos:
+Para testar esse deploy é necessário acessar a instância via ssh e rodar os comandos:  
+
+Acessar pasta onde estã a chave privada localmente (geralmente na pasta .ssh) e executar o comando:
+```bash
+ssh -i "nome dado a chave ssh" ubuntu@"IP_publico_da_instância"
+```
 
 Para verificar se o pod está rodando:
 ```bash
@@ -199,7 +163,7 @@ kubectl port-forward -n nginx --address 0.0.0.0 svc/nginx-service 8080:80
 
 Após a execução do comando basta colocar no navegador o Ip publico da instância direcionando para a porta 8080:
 ```bash
-http://<IP_publico_da_instância>:8080
+http://"IP_publico_da_instância":8080
 ```
 ℹ️ **Nota:** Caso prefira instalar manualmente ou alterar algum valor do helm, basta comentar ou remover as linhas abaixo do script:
 ```bash
@@ -223,7 +187,7 @@ kubectl port-forward -n "nome-do-seu-namespace" --address 0.0.0.0 svc/"nome-do-s
 
 Após a execução do comando o endereço:
 ```bash
-http://<IP_publico_da_instância>:8080
+http://"IP_publico_da_instância":8080
 ```
 
 Para desinstalar executar os comandos:
@@ -232,6 +196,26 @@ helm uninstall "nome-do-seu-app" --namespace "nome-do-namespace"
 ```
 ```bash
 kubectl delete namespace "nome-do-namespace"
+```
+## ⚠️ Atenção
+Os comandos do Kind devem ser utilizado com o `sudo`, como por exemplo:
+```bash
+sudo kind get clusters
+```
+⏳ O script leva de 4 a 8 minutos para instalar todas as ferramentas e criar o cluster no Kind, então caso acesse o sevidor e receba erros como os mostrados abaixo, é porque o cluster ainda não foi criado totalmente:
+
+```hcl
+$ kubectl get nodes
+E0228 02:54:38.722630   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.724144   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.725508   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.727079   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+E0228 02:54:38.728503   15574 memcache.go:265] "Unhandled Error" err="couldn't get current server API group list: Get \"http://localhost:8080/api?timeout=32s\": dial tcp 127.0.0.1:8080: connect: connection refused"
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+```
+```hcl
+$ sudo kind get clusters
+No kind clusters found.
 ```
 
 ### 🔑 Par de Chaves SSH
@@ -260,4 +244,39 @@ Você pode visualizar o conteúdo da chave pública com o comando:
 ```bash
 cat ~/.ssh/asatech_key.pub
 ```
-O valor que o comando retornar deve ser informado no Terraform (public_key).
+O valor que o comando retornar deve ser informado no Terraform (public_key).  
+
+## 🧹 Remoção da Infraestrutura
+
+1️⃣ Atualize o arquivo backend_config.tf comente as linhas abaixo e preencha com os valores reais dos recursos criados:
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "terraform-states-440744240874"
+    region         = "us-east-1"
+    key            = "terraform/state.tfstate"
+    dynamodb_table = "terraform-states-lock"
+    encrypt        = true
+  }
+}
+```
+Comente ou remova as linhas:
+```hcl
+# terraform {
+#   backend "local" {
+#     path = "terraform.tfstate"
+#   }
+# }
+```
+
+2️⃣ Migre o estado para o backend local. 
+Execute o comando abaixo para migrar o estado do backend remoto para o local remoto:
+```bash
+terraform init -migrate-state
+```
+
+3️⃣ Execute os comandos:
+```bash
+terraform init
+terraform destroy
+```

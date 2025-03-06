@@ -28,17 +28,6 @@ variable "instance_type" {
   type        = string
 }
 
-variable "key_name" {
-  description = "SSH key name to access the EC2 instance."
-  type        = string
-}
-
-variable "disable_api_termination" {
-  description = "Whether API termination of the EC2 instance is disabled to prevent accidental termination."
-  type        = bool
-  default     = false
-}
-
 variable "volume_type" {
   description = "EBS volume type (e.g., gp2, io1, st1, sc1, etc.)."
   type        = string
@@ -49,14 +38,7 @@ variable "volume_size" {
   type        = number
 }
 
-variable "delete_on_termination" {
-  description = "Whether the EBS volume will be deleted when the EC2 instance is terminated."
-  type        = bool
-  default     = true
-}
-
-variable "kms_key_id" {
-  description = "KMS for EBS encryption for default aws."
+variable "public_key" {
+  description = "Public key value"
   type        = string
-  default     = "arn:aws:kms:us-east-1:440744240874:key/440475fd-e755-45a4-bb22-8a47774a29ce"
 }

@@ -1,17 +1,16 @@
 module "s3_backend" {
   source      = "./s3"
-  profile     = "nome-do-profile-configurado-para-o-awscli"
-  region      = "regiao-que-deseja-criar-o-recurso"
-  bucket_name = "nome-do-bucket-para-armazenar-os-states-do-terraform"
-  state_key   = "terraform/state.tfstate"
-  managed_by  = "Terraform"
-  account_id  = "id da conta da aws"
+  profile     = var.profile
+  region      = var.region
+  bucket_name = var.bucket_name
+  managed_by  = var.managed_by
+  account_id  = var.account_id
 }
 
 module "dynamodb_backend" {
   source              = "./dynamodb"
-  profile             = "nome-do-profile-configurado-para-o-awscli"
-  region              = "regiao-que-deseja-criar-o-recurso"
-  dynamodb_table_name = "nome-da-tabela-para-armazenar-os-states-lock"
-  managed_by          = "Terraform"
+  profile             = var.profile
+  region              = var.region
+  dynamodb_table_name = var.dynamodb_table_name
+  managed_by          = var.managed_by
 }

@@ -84,7 +84,7 @@ resource "aws_instance" "ec2_instance" {
     volume_size           = var.volume_size
     delete_on_termination = var.delete_on_termination
     encrypted             = true
-    kms_key_id            = "alias/aws/ebs"
+    kms_key_id            = var.kms_key_id
   }
 
   tags = {
