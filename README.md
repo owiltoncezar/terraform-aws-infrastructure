@@ -248,7 +248,7 @@ O valor que o comando retornar deve ser informado no Terraform (public_key).
 
 ## 🧹 Remoção da Infraestrutura
 
-1️⃣ Atualize o arquivo backend_config.tf comente as linhas abaixo e preencha com os valores reais dos recursos criados:
+1️⃣ Atualize o arquivo backend_config.tf comente as linhas abaixo:
 ```hcl
 terraform {
   backend "s3" {
@@ -260,7 +260,7 @@ terraform {
   }
 }
 ```
-Comente ou remova as linhas:
+Descomente ou adicione as linhas:
 ```hcl
 # terraform {
 #   backend "local" {
