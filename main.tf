@@ -40,4 +40,5 @@ module "infrastructure" {
   volume_size   = var.volume_size
   volume_type   = var.volume_type
   ami           = data.aws_ami.ubuntu_latest.id
+  kms_key_id    = var.kms_key_id
 }

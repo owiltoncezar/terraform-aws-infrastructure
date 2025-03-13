@@ -42,3 +42,8 @@ variable "public_key" {
   description = "Public key value"
   type        = string
 }
+
+variable "kms_key_id" {
+  description = "KMS for EBS encryption for default aws."
+  type        = string
+}

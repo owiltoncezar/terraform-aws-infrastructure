@@ -58,5 +58,4 @@ variable "delete_on_termination" {
 variable "kms_key_id" {
   description = "KMS for EBS encryption for default aws."
   type        = string
-  default     = "arn:aws:kms:us-east-1:440744240874:key/440475fd-e755-45a4-bb22-8a47774a29ce"
 }

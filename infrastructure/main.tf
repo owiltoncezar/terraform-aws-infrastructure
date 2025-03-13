@@ -18,6 +18,7 @@ module "ec2_instance" {
   instance_type = var.instance_type
   volume_type   = var.volume_type
   volume_size   = var.volume_size
-  
+  kms_key_id    = var.kms_key_id
+
   depends_on = [module.key-par]
 }
